@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Package, DollarSign, Hash, Tag, FileText, Image } from 'lucide-react';
 import type { Product } from './products';
 

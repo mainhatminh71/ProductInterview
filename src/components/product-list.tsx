@@ -1,3 +1,4 @@
+import React from 'react';
 import { Edit2, Trash2, DollarSign, Package } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import type { Product } from './products';

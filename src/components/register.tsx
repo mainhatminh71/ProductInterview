@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Mail, Lock, User, UserPlus, Chrome, ArrowRight, Shield } from 'lucide-react';
 
 interface RegisterProps {

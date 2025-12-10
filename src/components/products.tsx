@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Plus, LogOut, Package, TrendingUp, DollarSign } from 'lucide-react';
 import { ProductList } from './product-list';
 import { ProductForm } from './product-form';

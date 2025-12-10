@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Mail, Lock, LogIn, Chrome, ArrowRight, Sparkles } from 'lucide-react';
 
 interface LoginProps {
