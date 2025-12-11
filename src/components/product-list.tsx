@@ -79,7 +79,7 @@ export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
                   className="p-2.5 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all hover:scale-110"
                   aria-label="Edit product"
                 >
-                  <Edit2 className="w-4.5 h-4.5" />
+                  <Edit2 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => {
@@ -90,7 +90,7 @@ export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
                   className="p-2.5 text-red-600 hover:bg-red-50 rounded-xl transition-all hover:scale-110"
                   aria-label="Delete product"
                 >
-                  <Trash2 className="w-4.5 h-4.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>

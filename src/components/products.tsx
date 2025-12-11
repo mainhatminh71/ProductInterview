@@ -195,7 +195,13 @@ export function Products({ onLogout }: ProductsProps) {
       {isFormOpen && (
         <ProductForm
           product={editingProduct}
-          onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct}
+          onSubmit={(productData) => {
+            if ('id' in productData) {
+              handleUpdateProduct(productData as Product);
+            } else {
+              handleAddProduct(productData);
+            }
+          }}
           onClose={handleCloseForm}
         />
       )}

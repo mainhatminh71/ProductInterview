@@ -4,7 +4,7 @@ import type { Product } from './products';
 
 interface ProductFormProps {
   product?: Product | null;
-  onSubmit: (product: any) => void;
+  onSubmit: (product: Product | Omit<Product, 'id'>) => void;
   onClose: () => void;
 }
 
@@ -30,14 +30,14 @@ export function ProductForm({ product, onSubmit, onClose }: ProductFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const productData = {
+    const productData: Product | Omit<Product, 'id'> = {
       ...(product && { id: product.id }),
       name,
       description,
       price: parseFloat(price),
       category,
       stock: parseInt(stock),
-      imageUrl: imageUrl || undefined,
+      ...(imageUrl ? { imageUrl } : {}),
     };
 
     onSubmit(productData);
