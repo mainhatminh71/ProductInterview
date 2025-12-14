@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, UserPlus, Chrome, ArrowRight, Shield } from 'lucide-react';
+import { Mail, Lock, User, UserPlus, Chrome, ArrowRight, Shield, X } from 'lucide-react';
+import axios from 'axios';
 
 interface RegisterProps {
   onRegister: () => void;
@@ -11,19 +12,96 @@ export function Register({ onRegister, onSwitchToLogin }: RegisterProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [otpPopUp, setOtpPopUp] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
 
+  const BASE_URL = import.meta.env.VITE_BASE_API_URL || 'https://product-interview.onrender.com';
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (name && email && password && password === confirmPassword && agreedToTerms) {
       setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setIsLoading(false);
-      onRegister();
+      const payload = { Email: email };
+      try {
+        const response = await axios.post(
+          `${BASE_URL}/api/auth/send-otp`,
+          payload,
+          { withCredentials: true }
+        );
+        console.log(response);
+        if (response.status === 200) {
+          setOtpPopUp(true);
+        }
+      } catch (error) {
+        console.error("Cannot send otp:", error);
+        alert("Failed to send OTP. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
+  const handleResendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      alert("Email is required");
+      return;
+    }
+    setOtpLoading(true);
+    const payload = { Email: email };
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/api/auth/send-otp`,
+        payload,
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        alert("OTP has been resent to your email");
+      }
+    } catch (error) {
+      console.error("Cannot resend otp:", error);
+      alert("Failed to resend OTP. Please try again.");
+    } finally {
+      setOtpLoading(false);
+    }
+  }
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      alert("Please enter a valid 6-digit OTP");
+      return;
+    }
+    setOtpLoading(true);
+    const payload = {
+      Name: name,
+      Email: email,
+      Password: password,
+      ConfirmPassword: confirmPassword
+    };
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/api/auth/register?otp=${otp}`,
+        payload,
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        console.log("Register successfully");
+        setOtpPopUp(false);
+        onRegister();
+      }
+    } catch (error: any) {
+      console.error("Register Error:", error);
+      const errorMessage = error?.response?.data?.message || error?.message || "Registration failed";
+      alert(errorMessage);
+    } finally {
+      setOtpLoading(false);
+    }
+  }
+  
   const handleGoogleRegister = async () => {
     if (!agreedToTerms) {
       alert('Please agree to the terms and conditions');
@@ -280,6 +358,65 @@ export function Register({ onRegister, onSwitchToLogin }: RegisterProps) {
                 <div className="text-gray-600">Uptime</div>
               </div>
             </div>
+            {otpPopUp && (
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full relative animate-in fade-in zoom-in duration-200">
+            <button
+              onClick={() => setOtpPopUp(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              aria-label="Close OTP popup"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl mb-4 shadow-xl">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Verify Your Email</h3>
+              <p className="text-gray-600">
+                We sent a 6-digit code to <span className="font-medium text-gray-900">{email}</span>
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <input
+                type="text"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} // chỉ cho nhập số
+                className="w-full text-center text-3xl tracking-widest py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                placeholder="••••••"
+                autoFocus
+              />
+            </div>
+
+            <button
+              onClick={handleVerifyOtp}
+              disabled={otpLoading || otp.length !== 6}
+              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3.5 rounded-xl hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {otpLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                'Verify OTP'
+              )}
+            </button>
+
+            <div className="mt-6 text-center text-gray-600">
+              Didn't receive the code?{' '}
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={otpLoading}
+                className="text-purple-600 hover:text-purple-700 font-medium"
+              >
+                Resend OTP
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
           </div>
         </div>
       </div>
